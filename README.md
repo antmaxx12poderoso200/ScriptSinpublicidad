@@ -1,614 +1,173 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anime - Latino Y Castellano</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: white;
-        }
-
-        .container {
-            max-width: 1800px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 2rem;
-            padding: 2rem 0;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            position: relative;
-        }
-
-        .premium-button {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            background: linear-gradient(45deg, #FFD700, #FFA500);
-            border: none;
-            border-radius: 25px;
-            color: #000;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            display: none; /* Ocultar inicialmente */
-        }
-
-        .premium-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        h1 {
-            font-size: 3rem;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-bottom: 0.5rem;
-        }
-
-        .search-bar {
-            display: flex;
-            gap: 15px;
-            margin: 20px auto;
-            max-width: 800px;
-            padding: 0 20px;
-        }
-
-        #search-input {
-            flex-grow: 1;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 25px;
-            font-size: 16px;
-            background: rgba(255, 255, 255, 0.9);
-        }
-
-        #sort-select {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 25px;
-            font-size: 16px;
-            background: rgba(255, 255, 255, 0.9);
-            cursor: pointer;
-        }
-
-        #results {
-            display: grid;
-            gap: 20px;
-            grid-template-columns: repeat(5, 1fr);
-            padding: 20px;
-        }
-
-        .anime-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        .anime-number {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.9rem;
-            z-index: 1;
-        }
-
-        .anime-card.premium {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .anime-card.premium::before {
-            content: '🔒 Premium';
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 5px 10px;
-            border-radius: 15px;
-            color: gold;
-            font-size: 0.8rem;
-            z-index: 1;
-        }
-
-        .anime-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        .anime-image-container {
-            width: 100%;
-            padding-top: 150%; /* 2:3 aspect ratio */
-            position: relative;
-            overflow: hidden;
-        }
-
-        .anime-image {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .anime-info {
-            padding: 10px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .anime-title {
-            font-size: 1rem;
-            color: #333;
-            margin-bottom: 5px;
-            font-weight: bold;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .anime-description {
-            color: #666;
-            font-size: 0.8rem;
-            flex-grow: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
-
-        .watch-button {
-            display: block;
-            width: 100%;
-            padding: 8px;
-            background: #4a90e2;
-            color: white;
-            text-align: center;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: background 0.3s ease;
-            margin-top: auto;
-            font-size: 0.9rem;
-        }
-
-        .watch-button:hover {
-            background: #357abd;
-        }
-
-        .premium-locked .watch-button {
-            background: #888;
-            cursor: not-allowed;
-        }
-
-        mark {
-            background-color: #ffd700;
-            padding: 0 2px;
-            border-radius: 3px;
-        }
-
-        @media (max-width: 1200px) {
-            #results {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        @media (max-width: 992px) {
-            #results {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            #results {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .search-bar {
-                flex-direction: column;
-            }
-
-            #search-input, #sort-select {
-                width: 100%;
-            }
-        }
-
-        @media (max-width: 480px) {
-            #results {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header class="header">
-            <h1>Anime</h1>
-            <button id="premium-button" class="premium-button">✨ Premium</button>
-        </header>
-
-        <div class="search-bar">
-            <input type="text" id="search-input" placeholder="Buscar anime..." aria-label="Buscar anime">
-            <select id="sort-select" aria-label="Ordenar anime">
-                <option value="asc">A-Z</option>
-                <option value="desc">Z-A</option>
-            </select>
-        </div>
-
-        <div id="results" role="list" aria-label="Lista de anime"></div>
-    </div>
-
-    <script>
-        const PREMIUM_KEY = "35326911poderoso200"; // Palabra clave para desbloquear contenido premium
-
-        const searchInput = document.getElementById('search-input');
-        const sortSelect = document.getElementById('sort-select');
-        const resultsContainer = document.getElementById('results');
-        const premiumButton = document.getElementById('premium-button');
-
-        let premiumUnlocked = false;
-        let showingPremiumOnly = false;
-        let xKeyPressCount = 0;
-        const requiredPresses = 10;
-
-        const animeList = [
-            // Animes normales
-            ["Black Clover", "Temporada Completa", "https://i.postimg.cc/mgptpKsn/Captura-de-pantalla-2025-04-20-105634.png", "https://mega.nz/folder/hS9mVSSS#chDvUqfPEcw_55b6vDGhYQ"],
-            ["Tokyo Ghoul", "Serie Completa", "https://is.gd/jqGXTP", "https://mega.nz/folder/JKNRRJrS#XmfCqAsF4NIAhlEf5YAMMw"],
-            ["Rimuru Tempest", "Tensei Shitara Slime", "https://is.gd/XZ3fGd", "https://mega.nz/folder/ELMDAbJR#RPSBlJUNwHS2mHEHh9UNRA"],
-            ["Hunter x Hunter", "Serie Completa", "https://is.gd/bu92x3", "https://mega.nz/folder/BWMnyQgT#4X1SbDuuC_Rg2CuR45inZA"],
-            ["Sword Art Online", "Temporada Completa", "https://is.gd/yYyKtq", "https://mega.nz/folder/EGNT0SqI#12ypspR4SDYi-sPDbG9W4w"],
-            ["Overlord", "Serie Completa", "https://is.gd/eaJ7MO", "https://mega.nz/folder/kHkXmQrK#vHitrWaLdS4wQ0BLLy5IdQ"],
-            ["Kimetsu no Yaiba", "Demon Slayer", "https://is.gd/SssjZM", "https://mega.nz/folder/leUkGRQQ#fUSQI8sXTKTxVG2FYf_wvg"],
-            ["Jigokuraku", "Serie Completa", "https://is.gd/SjvrQo", "https://mega.nz/folder/8aEiFKKK#87IvL5hnqFSVmnGmOcbGNQ"],
-            ["Mob Psycho 100", "Temporadas Completas", "https://is.gd/4vjQLm", "https://mega.nz/folder/JPNQxDCJ#2RmH8KPao9jTbZiRCdzhrg"],
-            ["Akuma Kun", "Serie 2023", "https://is.gd/kulvxj", "https://mega.nz/folder/BaNFBCoQ#iGagSrJjsO9qJWlkroK7kA"],
-            ["Date live", "no", "https://is.gd/3KvaqT", "https://mega.nz/folder/dHMQwJKK#34ZI_UG6nJ-Ka6dWqfV-_g"],
-            ["Dr Stone", "Todas las temporadas", "https://is.gd/Wltpsa", "https://mega.nz/folder/NOkVTQKa#2btJH6-Sb69gJtAt5p1dMQ"],
-            ["Edens Zero", "ㅤㅤ", "https://is.gd/JnTnz6", "https://mega.nz/folder/QP0CiTxD#3hiJUVGqiJt4AaJmPPQchQ"],
-            ["Damachi", "ㅤㅤ", "https://is.gd/2ipX33", "https://mega.nz/folder/Af1hUb7Q#cucJL5BmJ87exshk1Tk_MQ"],
-            ["Jujutsu Kaisen", "ㅤㅤ", "https://is.gd/wjzUG7", "https://mega.nz/folder/BPEkSBTD#dgMjb8DLf7vilHt4WkiUSg"],
-            ["Tokyo Revengers", "ㅤㅤ", "https://is.gd/NpeGy7", "https://mega.nz/folder/FblywYyQ#guUqEeZOS_cGaABTBxHDJw"],
-            ["Kenja no mago", "ㅤㅤ", "https://is.gd/DliFwp", "https://mega.nz/folder/gH9AFaLB#4kWdrEu-XesW4zaGqSuayw"],
-            ["ReMonster", "ㅤㅤ", "https://is.gd/WNd0FD", "https://mega.nz/folder/pHNHSaSA#RCdwTnJXID3Hxq-6Kloavw"],
-            ["No Game No Life", "ㅤㅤ", "https://is.gd/saubSg", "https://mega.nz/folder/tS8wyZCL#LzyEhYOET9dGTIgHh3uRqQ"],
-            ["Akame ga Kill!", "ㅤㅤ", "https://is.gd/AM7eRw", "https://mega.nz/folder/1bckyISJ#9YvVcBdXpi_BidrPeQmVZQ"],
-            ["Noragami", "ㅤㅤ", "https://is.gd/1rIv1a", "https://mega.nz/folder/1PVQ2KbT#Bl6MEWYFkxUOVgUEzSDWRw"],
-            ["Dungeon Mesh", "ㅤㅤ", "https://is.gd/m93I1e", "https://mega.nz/folder/BGEx3KBS#B-AXN8ZoCgVqUUOEnnLlOQ"],
-            ["Komi-san wa, Komyushou desu", "ㅤㅤ", "https://is.gd/c7KnyU", "https://mega.nz/folder/5e8kwZJT#s_jToWTYFZQjof7hdjP9rw"],
-            ["RADIANT ", "ㅤㅤ", "https://is.gd/K3NTgn", "https://mega.nz/folder/pKVxTKAI#biCI7fzxDibGHJ6pOwspaw"],
-            ["Tower of God (Kami no Tou) ", "ㅤㅤ", "https://is.gd/4OUJ1S", "https://mega.nz/folder/sfMgHKjR#Wj4ceIa09QpGT5KPbW4R5g"],
-            ["Seirei Gensouki  ", "ㅤㅤ", "https://is.gd/2WXCxQ", "https://mega.nz/folder/MWEmhJha#TdEK6jplWNGWMWf7sksglA"],
-            ["BASTARD‼ Heavy Metal, Dark Fantasyㅤ  ", "ㅤㅤ", "https://is.gd/G9yrGX", "https://mega.nz/folder/kTEjDa6D#5n-7JtNVVg3zL5Lx-VatFw"],
-            ["Level 1 dakedo Unique  Skill de Saikyou desuㅤ ", "ㅤㅤ", "https://is.gd/n69pIk", "https://mega.nz/folder/YecACJYT#ugw2RfB4NodTOYTsLST7ag"],
-            ["  Solo Levelingㅤ ", "ㅤㅤ", "https://is.gd/cnPgEO", "https://mega.nz/folder/ceEG3bxC#Gujt_YOPnVD-m20xf5JUfw"],
-            ["  ReZero kara Hajimeru Isekai ", "ㅤㅤ", "https://is.gd/hFV9d6", "https://mega.nz/folder/tWcX2JSJ#XmZwW-pHajhsOk9ihlAhUQ"],
-            ["  Ansatsu Kizoku BD Latin.", "ㅤㅤ"," https://is.gd/4sJ4F9", "https://mega.nz/folder/oON1mByb#zQZXQx7zC77GiHAQa0dllg"],
-            ["  Wind Breaker ", "ㅤㅤ"," https://is.gd/CJpUMw", "https://mega.nz/folder/dD0DRBwb#2hMpcgUSxzHLns8G7YaTiQ"],
-            ["  The Misfit of Demon King Academy ", "ㅤㅤ"," https://is.gd/quEhZJ ", "https://mega.nz/folder/Ab9FXTxa#hfSvFtQZ7A3wWwMU8mxm0A"],
-            [" Kami-tachi ni  Hirowareta Otoko ", "ㅤㅤ"," https://is.gd/6Tsj1B", "https://mega.nz/folder/UD9j2Spb#1dw4wcY1IAa0ra3gqsD6lg"],
-            ["  Mairimashita! Iruma-kun ", "ㅤㅤ","https://is.gd/CRqopD", "https://mega.nz/folder/VGtFRRrL#YE1cMSsCgly9emZZXehC9g"],
-            ["  Yamishibai  ", "ㅤㅤ","https://is.gd/oln50q", "https://mega.nz/folder/BGlGiJyC#S7_OGw9tY-T8aAT0Maa9rw"],
-            ["  Atack titan  ", "ㅤㅤ","https://is.gd/jUZoqT", "https://mega.nz/folder/8PVh3YwA#pz0Hjp09BLdONTtdS7pB6Q"],
-            ["  Kemono Jihen  ", "ㅤㅤ","https://is.gd/gBz0dB", "https://mega.nz/folder/saF32TBD#KXJfNoOVEghk5qgiGUWYIQ"],
-            ["  Log Horizon  ", "ㅤㅤ","https://is.gd/AIhPlW", "https://mega.nz/folder/ZLFSHAaI#0edVE9pEzRV1aoq3bJnMlQ"],
-            ["  Jigen no Ririsa   ", "ㅤㅤ","https://is.gd/VXy9Fs", "https://mega.nz/folder/5as1ULBb#CeY-nMFGHtJxSnqiX4kv6Q"],
-            ["  Sekai Saikou no Ansatsusha, Isekai Kizoku ni Tensei suru   ", "ㅤㅤ","https://is.gd/sEka0a", "https://mega.nz/folder/xS0k3QxQ#BBYXW4UBihfTkNauyBwyHg"],
-            ["  Isekai wa Smartphone to Tomo ni  ", "ㅤㅤ","https://is.gd/wNmMBK", "https://mega.nz/folder/ILsxRQDT#d5eGIAihFXg-1F_5JBMOVA"],
-            ["  Isekai de Cheat Skill wo Te ni Shita Ore wa ", "ㅤㅤ","https://is.gd/nmfvzL", "https://mega.nz/folder/VbFTnZSC#D0UkRfZePoDnF1OY2-wIfQ"],
-            ["  Otome Game Sekai wa Mob ni Kibishii Sekai desu", "ㅤㅤ","https://is.gd/A5cnCV", "https://mega.nz/folder/EXEiiaZD#YBugatu5tqMaxD94BFbP8g"],
-            ["  Sousou no Frieren", "ㅤㅤ","https://is.gd/2xq1wP", "https://mega.nz/folder/Ee0hgCpS#ToDDqemPLrbmU9qEAzX5Iw"],
-            ["  SPY×FAMILY ", "ㅤㅤ","https://is.gd/NbW3Ro", "https://mega.nz/folder/kT8lSbiD#lWO594-9SPpK37-SCf6uLQ"],
-            ["  Fumetsu no Anata e ", "ㅤㅤ","https://is.gd/9mxY4I", "https://mega.nz/folder/ELM2VYTZ#CVQMEanw5N4NDR8x5TLzGw"],
-            ["  Plunderer", "ㅤㅤ","https://i.postimg.cc/V6f8LWy9/1KGr66.jpg", "https://mega.nz/folder/MS83lSJI#5HizYZRMkpAx3Mmz5aLO6w"],
-            ["  Ore dake Haireru Kakushi Dungeon Kossori Kitaete Sekai Saikyou", "ㅤㅤ","https://is.gd/ZyP8IL", "https://mega.nz/folder/UO8AjTKb#p_vv0LqNSIxvpq0uHc5zRw"],
-            ["  Sword Gai The Animation", "ㅤㅤ","https://is.gd/vgQXcL", "https://mega.nz/folder/VOcRnZZS#-3rCFbwbHgng33dTiAucdw"],
-            ["   Chiyu Mahou no Machigatta", "ㅤㅤ","https://is.gd/kB6vLj", "https://mega.nz/folder/NaUAAarZ#BVc1G4c_mPONMN-pZ-j0dQ"],
-            ["  darling in the franxx", "ㅤㅤ","https://is.gd/BHxcq8", "https://mega.nz/folder/oOFhjagR#db0AY6up3AcSZxeOXm_png"],
-            ["  Hakushaku to Yōsei", "ㅤㅤ","https://is.gd/HxsNsO", "https://mega.nz/folder/Zbkk0Q4Z#tUZWt2C0XybdXrc-XZL_pA"],
-            ["  Kono Subarashii Sekai", "ㅤㅤ","https://is.gd/i0KhHE", "https://mega.nz/folder/xWsGDIBT#KtcklXCkiR52WLKwoJkuTw"],
-            ["  Tsue to Tsurugi no Wistoria", "ㅤㅤ","https://is.gd/xkmcl7", "https://mega.nz/folder/8Oc0BCpA#TZ-epkfT8JUky3IhJjlpoQ"],
-            ["  Tsuki ga Michibiku Isekai Douchuu", "ㅤㅤ","https://is.gd/atVZmg", "https://mega.nz/folder/8Oc0BCpA#TZ-epkfT8JUky3IhJjlpoQ"],
-            [" Isekai Ookami to Koushinryou", "ㅤㅤ","https://is.gd/6n6jf6", "https://mega.nz/folder/1KFSWZZY#J7YILutmd2vBDDnjOuFn5g"],
-            [" Death March kara Hajimaru Isekai Kyousoukyoku", "ㅤㅤ","https://is.gd/6LINo9", "https://mega.nz/folder/1PF2UKZL#Y3CQN6SNcEsCnu7vg_KmlQ"],
-            [" Goblin Slayer BD Latino", "ㅤㅤ","https://is.gd/SjABxq", "https://mega.nz/folder/dTVlGTLS#mLhXZp4kl7gjsYxnJpdjmg"],
-            [" Nube Kekkon suru tte, Hontou desu", "ㅤㅤ","https://is.gd/XmEduO", "https://mega.nz/folder/VCUUnDSI#iG1vhNE-ldrAxrEAX9QPzQ"],
-            [" Saitama  ", "ㅤㅤ","https://is.gd/58dhXG", "https://mega.nz/folder/oLEC1QwD#SegbBEVbTiIxPYhlDEmD-g"],
-            [" Aharen-san wa Hakarenai  ", "ㅤㅤ","https://is.gd/DFLqtN", "https://mega.nz/folder/sCNGkCgY#b04fu3ohRb7xYsnsvU9UyQ"],
-            [" Demon Lord 2099  ", "ㅤㅤ","https://is.gd/FbWKHv", "https://mega.nz/folder/5KcF3L5D#XigX-1eFxoeagxx4gxK-HQ"],
-            [" Sentouin, Hakenshimasu  ", "ㅤㅤ","https://is.gd/u2bQjw", "https://mega.nz/folder/lH0lyBCD#aqHEHj-uWfdwXgl35CRJ9Q"],
-            [" Tate no Yuusha no Nariagari ", "ㅤㅤ","https://is.gd/Go8z8a", "https://mega.nz/folder/ZOF0DRjZ#rzoKeDkpYBY0_2BUp3c_wg"],
-            [" Bye Bye, Earth ", "ㅤㅤ","https://is.gd/78h29M", "https://mega.nz/folder/4W9nnaoT#bQxxfz77dU4rPQjhGPLMyQ"],
-            [" Arifureta Shokugyou de Sekai Saikyouh ", "ㅤㅤ","https://is.gd/VObirK", "https://mega.nz/folder/hf90DAJK#kNXKjnybpJzeWQtKNCHZ-w"],
-            ["Shangri-La Frontier: Kusoge Hunter, Kamige ni Idoman to su ", "ㅤㅤ","https://is.gd/HfWoCm", "https://mega.nz/folder/BGsw1bwT#6uHAwx0CZi_c5OApMhgUWA"],
-            ["  Sengoku Night Blood ", "ㅤㅤ","https://is.gd/vbt1ZG", "https://mega.nz/folder/0SEHzYoB#dz-4I4LXl9MNewgvILx4VQ"],
-            [" Mushoku Tensei Isekai Ittara Honki Dasu  ", "ㅤㅤ","https://is.gd/PLupUB", "https://mega.nz/folder/pWVXAARY#MXcBoezxuhR08oyv-5behQ"],
-            [" Genjitsu Shugi Yuusha no Oukoku Saikenki  ", "ㅤㅤ","https://is.gd/S720Hy", "https://mega.nz/folder/VS9Emb4J#C6ZWPU-nu_XcN9gjePwZgg"],
-            [" Blue Lock  ", "ㅤㅤ","https://is.gd/dqWKj1", "https://mega.nz/folder/cWdHjKrR#l5QKeokUSosqufOecf9uuw"],
-            [" Amagami-san Chi no Enmusubi  ", "ㅤㅤ","https://is.gd/wNmMBK", "https://mega.nz/folder/FfkWXbKD#bcOBIqhKEv5dXpCUccs8kw"],
-            [" Monster DVD Castellano  ", "ㅤㅤ","https://is.gd/6xWhUh", "https://mega.nz/folder/VS8DGJbA#g8jMqe3lHsF5fOBKJoOTbQ"],
-            [" Yozakura-san Chi no Daisakusen  ", "ㅤㅤ","https://is.gd/CK57ct", "https://mega.nz/folder/4G1A1bLQ#uITLC9mmOIMVZ-HYfuulAA"],
-            [" Magic Maker: Isekai Mahou no Tsukurikata  ", "ㅤㅤ","https://is.gd/G9zJOX", "https://mega.nz/folder/MHMGnaBb#FTwKScJWVvgEbtz1MLsNqg"],
-            [" Rurouni Kenshin -Meiji Kenkaku Romantan-  ", "ㅤㅤ","https://is.gd/jch65J", "https://mega.nz/folder/sK0CgKaa#J8XBU6VqF3TlH0GNhPmDBQ"],
-            [" Sakamoto Days  ", "ㅤㅤ","https://is.gd/2um2Ln", "https://mega.nz/folder/Ie0TzKDa#4USvriupvxQw9qRG8Tmd3A"],
-            [" Castlevania Nocturne ", "ㅤㅤ","https://is.gd/qYyouw", "https://mega.nz/folder/ULdSURAQ#sIomgXHPIiyszZFBARhBqQ"],
-            [" Medalist ", "ㅤㅤ","https://is.gd/TJZD69", "https://mega.nz/folder/5bM0nCgS#Ua3ApMSpG-W262jqZUyk4g"],
-            [" Tokidoki Bosotto Russia-go de Dereru Tonari no Alya-san ", "ㅤㅤ","https://is.gd/jI73Jd", "https://mega.nz/folder/4KtU3RAQ#SQ9nkcbNPaHK1dAlhlN5PQ"],
-            ["One Piece (Latino)", "ㅤㅤ","https://is.gd/uRE8Uj", "https://mega.nz/folder/4KtU3RAQ"],
-            ["100-man BD Latino", "ㅤㅤ","https://is.gd/oMi2cd", "https://mega.nz/folder/4XdChLwS#1rY-p2vkWAaETMP7yyCvcQ"],
-            ["Nanatsu no Taizai", "ㅤㅤ","https://is.gd/faNYgM", "https://mega.nz/folder/oacnFSyB#A5M0PgaXJseLlWvR65Gb0A"],
-            ["Shikkakumon no Saikyokenja", "ㅤㅤ","https://is.gd/lIGCjn", "https://mega.nz/folder/VTFRwIRJ#ABTrRvfjtypeWCJMKFkcpA"],
-            ["Isekai Yururi Kikou Kosodateshinagara Boukensha Shimasu", "ㅤㅤ","https://is.gd/EjLhds", "https://mega.nz/folder/lPlQRD7I#ARFonF9b2jJRDuxVI6yuhQ"],
-            ["Pandora Hearts", "ㅤㅤ","https://is.gd/sMlDEV", "https://mega.nz/folder/1e1WETSA#yV3kLMMVrb-hAFpSzGYGmQ"],
-            [" Todas las temporadas De Baki", "ㅤㅤ","https://is.gd/CRxI4w", "https://mega.nz/folder/0K0AGIJK#gCghlE4nTBqGXTy2GTnEeg"],
-            ["Kaiju No", "ㅤㅤ","https://is.gd/8A3WRT", "https://mega.nz/folder/YflW1QyT#tKZ2bMUc_Rl5Rni-ZdkUTA"],
-            ["Mashle Magic and Muscles", "ㅤㅤ","https://is.gd/REYB6R", "https://mega.nz/folder/NHNEhbRC#Ro_P91X-SCm25UrbZ3a3hw"],
-            [" Zenshuu", "ㅤㅤ","https://is.gd/tFbnaz", "https://mega.nz/folder/5blh2CBK#HF2JtvJXqOe68h9JD8Yo_Q"],
-            [" Kimi to Boku no Saigo no Senjou, Aruiwa Sekai ga Hajimaru Seisen", "ㅤㅤ","https://is.gd/jzmPJm", "https://mega.nz/folder/Jbt1ibqD#gv6d-sbR2S95ot71HRTmgw"],
-            [" Akuyaku Reijou nanode Last Boss wo Kattemimashita", "ㅤㅤ","https://is.gd/gFrd9k", "https://mega.nz/folder/dDEyCDpB#iAKT3lj1ZLXWu7BnNCDePQ"], 
-            ["Dorohedoro", "ㅤㅤ","https://is.gd/6DRHlY", "https://mega.nz/folder/obsFnajC#GlI-JiOnnd6cHgmGy0vFrg"],
-           ["Hoshizora e Kakaru Hashi", "ㅤㅤ","https://is.gd/Ak7goD", "https://mega.nz/folder/hO0WgARD#aMchCvfF4eU2nIsv5Mj05g"],
-           [" Ranma (1989) ", "ㅤㅤ","https://is.gd/oPAsCT", "https://mega.nz/folder/1b9WiB6R#52sghOcowY5HV86dBEh_Yg"],
-          ["    Ranma 12 (2024)     ", "ㅤㅤ","https://is.gd/IrfBiq", "https://mega.nz/folder/ofMAjQaI#wJ8Owr2T1rjaA2PzIjEBUg"],
-         ["    Myself; Yourself    ", "ㅤㅤ","https://is.gd/x7MjZ9", "https://mega.nz/folder/wDlj2D5C#2tzTMbzUKSn5pvyjS_7hAw"],
-        ["   Jibaku Shonen Hanako-kun ", "ㅤㅤ","https://is.gd/FR2nTr", "https://mega.nz/folder/tCc2xLZD#CqgzncvftR2EN6FHucbOEw"],
-        ["    Hentai Ouji to Warawanai Neko ", "ㅤㅤ","https://is.gd/eQp2F1", "https://mega.nz/folder/0fNA1KhS#TW5q9wk5KtajtNLdgdvH_A"],
-       ["    Ningen Fushin no Boukenshatachi ga Sekai wo Sukuu Youdesu  ", "ㅤㅤ","https://is.gd/ZzSuOR", "https://mega.nz/folder/IesUyR7C#ZpALFTR9m27-9MIy_FCzfg"],
-      ["    Subete ga F ni Naru ", "ㅤㅤ","https://is.gd/HMpNi9", "https://mega.nz/folder/8HFFFQiC#9-qpOu_hZY9R_pY7-QsEbA"],
-     ["    VTuber nanda ga Haishin Kiri Wasuretara Densetsu ni Natteta ", "ㅤㅤ","https://is.gd/NKyyYL", "https://mega.nz/folder/QO0WjIqQ#TBzBmNghlCPuAI_qbA4CBQ"],
-     ["    Watashi no Shiawase na Kekkon  ", "ㅤㅤ","https://is.gd/UYBzQo", "https://mega.nz/folder/Ffc1VKCZ#XxjxbCNk_ZqisVA-yW8uGw"],
-     ["   Übel Blatt ", "ㅤㅤ","https://is.gd/j3E6Xv", "https://mega.nz/folder/Ffc1VKCZ#XxjxbCNk_ZqisVA-yW8uGw"],
-     ["  Bleach ", "ㅤㅤ","https://is.gd/3RRhmQ", ""],
-     [" Zero no Tsukaima ", "ㅤㅤ","https://is.gd/ozEFNK", ""],
-      [" Peach Boy Riverside ", "ㅤㅤ","https://is.gd/mD2yIM", ""],
+<p align="center">
+    <img width="120px" src="./assets/icon.png"/>
+    <h1 align="center">akuse</h1>
+</p>
 
-   
- 
-      
+<p align="center">
+  <strong>Simple and easy to use anime streaming desktop app without ads.</strong>
+</p>
 
- 
+<p align="center">
+    <img alt="license" src="https://img.shields.io/github/license/aleganza/akuse"> 
+    <img alt="GitHub release (with filter)" src="https://img.shields.io/github/v/release/akuse-app/akuse">
+    <img alt="total-downloads" src="https://img.shields.io/github/downloads/aleganza/akuse/total">
+    <a href="https://discord.gg/f3wdnqSNX5">
+        <img alt="Discord" src="https://img.shields.io/discord/1163970236224118796?style=flat&label=discord&logo=discord&color=%235567E3">
+    </a>
+</p>
 
+<p align="center" style="text-decoration: none;">
+    <a href="https://github.com/akuse-app/akuse/releases/latest">
+        <img alt="Made For Windows" src="https://img.shields.io/badge/made_for-Windows-0078D6?style=flat&logo=windows&logoColor=white"><img alt="Made For Linux" src="https://img.shields.io/badge/made_for-Linux-FCC624?style=flat&logo=linux&logoColor=white">
+    </a>
+</p>
 
+<p align="center">
+    <a href="https://ko-fi.com/aleganza">
+      <img width="400px" src="https://cdn.prod.website-files.com/5c14e387dab576fe667689cf/64f1a9ddd0246590df69ea0b_kofi_long_button_red%402x.png"/>
+    </a>
+</p>
 
+<img title="img" alt="img" src="./assets/screenshot.jpg">
 
+<br/>
 
+# Why should you choose akuse?
 
+- **🚀 Fast:** Smooth and quick streaming with minimal buffering.
+- **🎨 Sleek UI:** User-friendly and eye-catching.
+- **🔄 Reliable:** Regular updates and fresh content.
 
+<br/>
 
+# Languages
 
+The languages where both the sub and dub don't work are implemented in the app, but they aren't selectable.
 
+| Source           | Languages           | Sub | Dub | Notes                                                      |
+| ---------------- | ------------------- | --- | --- | ---------------------------------------------------------- |
+| 🌍 Yuki          | English + many more | ✅  | ✅  | Recommended                                                |
+| 🇮🇹 AnimeUnity    | Italian             | ✅  | ✅  | Italian recommended                                        |
+| 🇺🇸 Maze          | English             | ✅  | ✅  | Great alternative                                          |
+| 🇺🇸 Pahe          | English             | ✅  | ✅  | Great alternative                                          |
+| 🇺🇸 AnimeParadise | English + some more | ✅  | ❌  | Works for some anime, not always up-to-date                |
+| 🇺🇸 AnimeHeaven   | English             | ✅  | ❌  | Works for some anime, not always up-to-date                |
+| 🌍 HiAnime       | English + many more | ✅  | ❌  | Unreliable, slow, doesn't always provide all the languages |
+| 🇺🇸 Gogoanime     | English             | ❌  | ❌  | Broken                                                     |
 
+# Other info
 
+<details>
+  <summary><h2>⚙️ Running locally for development</h2></summary>
 
+Start cloning akuse:
 
+```
+git clone https://github.com/akuse-app/akuse.git
+```
 
+Next, go to [this link](https://anilist.co/settings/developer) and create a new AniList API Client.
+As Redirect Uri, you can insert `akuse://index,https://anilist.co/api/v2/oauth/pin` (these are two space seprated uri) and it should work.
+Now go inside the src/modules folder and create a clientData.ts file with a structure like this:
 
+```bash
+import { ClientData } from "../types/types";
 
+export const clientData: ClientData = {
+  clientId: ,
+  redirectUri: "",
+  clientSecret: "",
+};
+```
 
+Fill it with the data retrieved from the creation of your AniList API Client.
 
+```bash
+# Example:
+import { ClientData } from "../types/types";
 
+export const clientData: ClientData = {
+  clientId: 12345,
+  redirectUri: 'akuse://index',
+  clientSecret: 'iA04TKLO3k3LaVWhxucJwck0glR6uhiv',
+};
+```
 
+Next, install its dependencies (make sure npm is installed on your machine):
 
+```
+npm install
+```
 
+To start, run:
 
+```
+npm start
+```
 
+</details>
+<details>
+  <summary><h2>⚠ How to Log-In in AppImage & Development</h2></summary>
 
+In AppImage and in a Development environment, the Log-In redirect doesn't work since the app is not packed/installed. If you need to work with an authenticated instance, follow these steps:
 
+1. open the app using one of the method e.g.
 
+   ```
+   npm start
+   ```
 
+   or
 
+   ```
+   ./path/to/app.AppImage
+   ```
 
+2. Now click on the login button and authenticate in the browser. Next, copy the code you are given, go back to akuse and click the navbar element with a laptop icon. Here you can paste your code.
 
+3. Finally, paste your code and push the button. If the code you entered is correct, you are now Logged-in, othwerise repeat these steps and see what has gone wrong.
 
+**NOTE:** This is not needed in Installed App.
 
+</details>
+<details>
+  <summary><h2>⌨ Shortcuts</h2></summary>
 
+- Pages
+  - F1: go to Discover page
+  - F2: go to Library page
+  - F3: go to Search page
+- Video player - Space: play/pause video - Left arrow: fast rewind (5s) - Right arrow: fast forward (5s) - Upper arrow: increase volume - Lower arrow: decrease volume - F11: fullscreen toggler - F: fullscreen toggler - M: mute/unmute video - P: play previous episode - N: play next episode
+</details>
 
+## 🐛 Known Issues
 
+- If Log-In in installed apps doesn't work, make sure you have set a default browser.
+- Some anime may not work due to different names compared to AniList. Feel free to open a new issue if you find any, so they can be fixed.
 
+## 🌟 Contributors
 
+[![](https://contrib.rocks/image?repo=akuse-app/akuse)](https://github.com/akuse-app/akuse/graphs/contributors)
 
+## 🙌 Credits
 
+- [Consumet API](https://github.com/consumet/consumet.ts): used to fetch episodes links
+- [This API](https://api.ani.zip/mappings?anilist_id=21): used to fetch episodes info and thumbnails
+- [AniSkip API](https://api.aniskip.com/api-docs#/skip-times/SkipTimesControllerV2_getSkipTimes): used to fetch episode intros & outros.
+- [Aniwatch API](https://github.com/ghoshRitesh12/aniwatch-api): used to get hianime episode sources if consumet fails to.
+  <br/>
 
+# Legal
 
+## 📢 Disclaimer
 
+- akuse helps users find anime by simply scraping links from various websites.
+- akuse or its developers do not host the content found on akuse. All images and anime information found in the app are retrieved from AniList public API.
+- Additionally, all anime links found on akuse are from various third party anime hosting websites.
+- akuse or its owner are not responsible for the misuse of any content inside or outside the app and shall not be responsible for the dissemination of any content within the app.
+- By using this app, you agree that the app developer is not responsible for the content within the app. Nevertheless, they may or may not come from legitimate sources.
+- For internet violations, please contact the source website. The developer is not legally responsible.
 
+## 📜 License
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            // Animes premium (ocultos)
-            ["a25-sai no Joshikousei", "ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ", "https://is.gd/ZlzbIV", "https://mega.nz/folder/9X8ShZ5A#qgh4SiRvR3msBTNm85U7rQ", true],
-            ["Kaifuku Jutsushi no Yarinaoshi", "ㅤㅤㅤㅤㅤㅤㅤㅤ", "https://is.gd/vriQYG", "https://mega.nz/folder/RWFCWRAa#PPHVg251ajWJE2aCrI6bPQ", true],
-            ["High School DxD", "ㅤㅤㅤㅤㅤㅤㅤㅤ", "https://is.gd/ocFINN", "https://mega.nz/folder/leUkGRQQ", true],
-           ["chiban Ushiro no Daimaou", "ㅤㅤㅤㅤㅤㅤㅤㅤ", "https://is.gd/gY85Q0", "https://mega.nz/folder/0bd3lL6Y#yREx36wlS1n8edU6l8LkNQ", true],
-          [" Isekai Meikyuu de Harem wo", "ㅤㅤㅤㅤㅤㅤㅤㅤ", "https://is.gd/1s6bIC", "https://mega.nz/folder/8XEXFbyL#BZqSUHTe7Vo55Bok2hLT8w", true],
-
-
-
-
-
-
-
-
-
-
-
-    
-        ];
-
-        function normalizeString(str) {
-            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-        }
-
-        function highlightMatch(text, searchTerm) {
-            if (!searchTerm) return text;
-            const regex = new RegExp(`(${searchTerm})`, 'gi');
-            return text.replace(regex, '<mark>$1</mark>');
-        }
-
-        function checkPremiumAccess(searchTerm) {
-            if (normalizeString(searchTerm) === normalizeString(PREMIUM_KEY)) {
-                premiumUnlocked = true;
-                premiumButton.style.display = 'block';
-                searchInput.value = '';
-                alert('¡Contenido premium desbloqueado!');
-                updateResults();
-                return true;
-            }
-            return false;
-        }
-
-        function togglePremiumContent() {
-            showingPremiumOnly = !showingPremiumOnly;
-            premiumButton.style.background = showingPremiumOnly
-                ? 'linear-gradient(45deg, #FFA500, #FFD700)'
-                : 'linear-gradient(45deg, #FFD700, #FFA500)';
-            updateResults();
-        }
-
-        function updateResults() {
-            const searchTerm = normalizeString(searchInput.value);
-            const sortOrder = sortSelect.value;
-
-            if (checkPremiumAccess(searchTerm)) return;
-
-            const filteredAndSortedAnime = animeList
-                .filter(anime => {
-                    const isPremiumMatch = (!anime[4] || premiumUnlocked);
-                    const isPremiumFilter = !showingPremiumOnly || (showingPremiumOnly && anime[4]);
-                    const isSearchMatch = (normalizeString(anime[0]).includes(searchTerm) ||
-                                        normalizeString(anime[1]).includes(searchTerm));
-                    return isPremiumMatch && isPremiumFilter && isSearchMatch;
-                })
-                .sort((a, b) => {
-                    const comparison = a[0].localeCompare(b[0]);
-                    return sortOrder === 'asc' ? comparison : -comparison;
-                });
-
-            resultsContainer.innerHTML = filteredAndSortedAnime.map((anime, index) => `
-                <div class="anime-card ${anime[4] ? 'premium' : ''} ${!premiumUnlocked && anime[4] ? 'premium-locked' : ''}" role="listitem">
-                    <div class="anime-number">#${index + 1}</div>
-                    <div class="anime-image-container">
-                        <img class="anime-image" src="${anime[2]}" alt="${anime[0]}" onerror="this.src='https://via.placeholder.com/300x450?text=Anime'">
-                    </div>
-                    <div class="anime-info">
-                        <div class="anime-title">${highlightMatch(anime[0], searchInput.value)}</div>
-                        <div class="anime-description">${highlightMatch(anime[1], searchInput.value)}</div>
-                        <a href="${!premiumUnlocked && anime[4] ? '#' : anime[3]}"
-                           target="_blank"
-                           rel="noopener noreferrer"
-                           class="watch-button"
-                           ${!premiumUnlocked && anime[4] ? 'onclick="return false;"' : ''}>
-                            ${!premiumUnlocked && anime[4] ? '🔒 Contenido Premium' : 'Ver Anime'}
-                        </a>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        searchInput.addEventListener('input', updateResults);
-        sortSelect.addEventListener('change', updateResults);
-        premiumButton.addEventListener('click', togglePremiumContent);
-
-        document.addEventListener('keydown', function(event) {
-            if (event.key.toLowerCase() === 'x') {
-                xKeyPressCount++;
-                if (xKeyPressCount === requiredPresses) {
-                    premiumUnlocked = true;
-                    premiumButton.style.display = 'block';
-                    alert('¡Contenido premium desbloqueado!');
-                    updateResults();
-                    xKeyPressCount = 0;
-                }
-            } else {
-                xKeyPressCount = 0;
-            }
-        });
-
-        updateResults();
-    </script>
-</body>
-</html>
+Licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html#license-text).
